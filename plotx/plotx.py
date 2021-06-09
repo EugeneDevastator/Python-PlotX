@@ -7,6 +7,80 @@ Created on Tue Jun  8 13:01:39 2021
 
 import matplotlib.pyplot as plt;
 import numpy as np;
+
+# ------------------ data conversion -----------------
+# cupher format 
+# p:xy indexing over list of points [x,y], outputting indexes into p and [x,y] values into x and y lists
+# -:z indexing over array of z values, discaridng their indexes (as marke by -)
+# *z shorthand form of -:z
+# x,z outputs lists into corresponding names.
+def toPlotData(data, cypher):
+    valDict = {}
+    bins = cypher.split(',')
+    if len(bins) == 1:
+        addNestedToData(data,cypher,valDict)
+    else:
+        row = 0
+        for b in bins:
+            addNestedToData(data[row],b,valDict)
+            row = row + 1
+    return valDict
+
+
+#new list cypher snytax: i:xyi:z
+# for example [1,2,[3,4,5]] -:xy-:z
+
+def addNestedToData(nest,cypher,valDict = {},trailNames='',trailVals=[]):
+    cypher = cypher.replace('*','-:')
+    
+    for c in cypher.replace(':',''):
+        if c not in valDict:
+            valDict[c]=[]
+    
+    split = cypher.find(':')
+    if (split < 1): # there is no more indexes
+        nestSemantic = cypher
+        
+        if len(nestSemantic) == 1: # our nest is value
+            valDict[nestSemantic].append(nest)
+                
+        else: #nest is list of values
+            for n,v in zip(nestSemantic,nest):
+                valDict[n].append(v)
+        
+        #write trailing values
+        for n,v in zip(trailNames,trailVals):
+            valDict[n].append(v)
+        
+    else: #we have index with props
+        propSemantic = cypher[:split-1]
+        idxSemantic = cypher[split-1]
+        nestSemantic = cypher[split+1:]
+        splitIndex = len(propSemantic)
+        
+        if splitIndex>0:  # add inner props to index and continue
+            propValues = nest[:splitIndex]        
+            nextNest = nest[splitIndex]
+            
+            newTrailNames = trailNames + propSemantic    
+            newTrailVals = trailVals + propValues
+            addNestedToData(nextNest,
+                            idxSemantic+':'+nestSemantic,
+                            valDict,
+                            newTrailNames,
+                            newTrailVals)
+
+        else: # iterate over index
+            newTrailNames = trailNames + idxSemantic            
+            idx = 0    
+            for egg in nest:
+                newTrailVals = trailVals + [idx]
+                idx = idx + 1
+                nextNest = egg
+                addNestedToData(nextNest, nestSemantic, valDict, newTrailNames, newTrailVals)
+    return valDict
+
+# ---------- PLOTTING ---------------
             
 def UniformDots2D(x,y):
     low = np.min(np.concatenate((x,y)))
@@ -54,7 +128,6 @@ def UniformDots3D(x,y,z,c = None, s = None, a = 1):
         
     if a == None:
         a = 1
-
         
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
@@ -77,7 +150,6 @@ def UniformLine3D(x,y,z,c = None, s = None, a = 1):
         
     if a == None:
         a = 1
-
         
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
@@ -95,100 +167,96 @@ def UniformLine3D(x,y,z,c = None, s = None, a = 1):
     ax.plot(x,y,z, c=c, alpha = a)
     plt.show()
 
-def toPlotData(data, cypher):
-    valDict = {}
-    bins = cypher.split(',')
-    row = 0
 
-    subDimId = 0
-    for b in bins:
-        if len(bins) ==1:
-            bvals = data
-        else:
-            bvals = data[row]
-        row = row + 1
+def create2dFigure():
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ax.set_aspect('equal')
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    return ax;
+
+def create3dFigure():
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ax.set_box_aspect((1, 1, 1)) 
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    return ax;
+
+def plotLine3DLambda(ax, valDict):
+    if 'a' not in valDict:
+        a = 1
+    if 'c' not in valDict:
+        c = None
+    return lambda: ax.plot(x,y,z, c=c, a = a)
+
+def lines1d(valDicts):
+    axes = create2dFigure()   
+    low = valDicts[0]['x'][0]
+    high = valDicts[0]['x'][0]
+    for vd in valDicts:
+        print(vd['x'])
+        flatvals = vd['x']
+        axes.plot(vd['x'])
+
+        low = min(low,np.min(flatvals))
+        high = max(high,np.max(flatvals))
+
+    ax.set_xlim(low, high)
+    ax.set_ylim(low, high)
+        
+    plt.show()
+   
+def lines2d(valDicts):
+    actions=[]
+    axes = create2dFigure()   
+    low = valDicts[0]['x'][0]
+    high = valDicts[0]['x'][0]
+    for vd in valDicts:
+        flatvals = np.concatenate(vd['x'],vd['y'])
+        axes.plot(vd['x'],vd['y'])
+        
+        low = min(low,np.min(flatvals))
+        high = max(high,np.max(flatvals))
+
+    ax.set_xlim(low, high)
+    ax.set_ylim(low, high)
+
+    plt.show()
+
+def lines3d(valDicts):
+    axes = create3dFigure()   
+    low = valDicts[0]['x'][0]
+    high = valDicts[0]['x'][0]
+    for vd in valDicts:
+        flatvals = np.concatenate(vd['x'],vd['y'],vd['z'])
+        plotLine3DLambda(axes,vd)
+        low = min(low,np.min(flatvals))
+        high = max(high,np.max(flatvals))
+
+    ax.set_xlim(low, high)
+    ax.set_ylim(low, high)
+
+    plt.show()
     
-        for dim in b:
-            if type(bvals) is list:        # curren bin looks at list
-                if type(bvals[0]) is list: # curren bin consist of lists
-                    valDict[dim] = [p[subDimId] for p in bvals]
-                else:                      # curren bin consists of values
-                    valDict[dim] = bvals
-                    #valDict[dim] = [p for p in bvals]
-                    #valDict[dim] = bvals[subDimId]
-            else:                          # curren bin looks at a value
-                valDict[dim] = bvals       # essentialy a value
-                
-            subDimId = subDimId + 1
-        subDimId = 0
-    return valDict
-
-
-#new list cypher snytax: i:xyi:z
-# for example [1,2,[3,4,5]] -:xy-:z
-
-def addNestedToData(nest,cypher,valDict = {},trailNames='',trailVals=[]):
-    for c in cypher.replace(':',''):
-        if c not in valDict:
-            valDict[c]=[]
-    
-    split = cypher.find(':')
-    if (split < 1):
-        print('endpoint semantic',cypher)
-        nestSemantic = cypher
-        
-        if len(nestSemantic) == 1: #
-            print('len sem ==1',nest)
-            valDict[nestSemantic].append(nest)
-                
-        else: #nest is ndim list
-            print('endpoint nest',nest)
-            eggidx=0
-            
-            #write values from nest
-            for n,v in zip(nestSemantic,nest):
-                valDict[n].append(v)
-        
-        #write trailing values
-        for n,v in zip(trailNames,trailVals):
-            valDict[n].append(v)
-            
-        
-    else:
-        propSemantic = cypher[:split-1]
-        idxSemantic = cypher[split-1]
-        nestSemantic = cypher[split+1:]
-        splitIndex = len(propSemantic)
-        
-        if splitIndex>0:  # add inner props to index and continue
-            propValues = nest[:splitIndex]        
-            nextNest = nest[splitIndex]
-            
-            newTrailNames = trailNames + propSemantic    
-            newTrailVals = trailVals + propValues
-            print('newTrailNames and vals',newTrailNames, '---', newTrailVals)
-            print('recusing into', nextNest)
-            addNestedToData(nextNest,
-                            idxSemantic+':'+nestSemantic,
-                            valDict,
-                            newTrailNames,
-                            newTrailVals)
-
-        else: # iterate over index
-            newTrailNames = trailNames + idxSemantic            
-            idx = 0    
-            for egg in nest:
-                newTrailVals = trailVals + [idx]
-                print('newTrailNames and vals',newTrailNames, '---', newTrailVals)
-                nextNest = egg
-    
-                idx = idx + 1
-                print('recursing egg',nextNest,nestSemantic)
-                
-                addNestedToData(nextNest, nestSemantic, valDict, newTrailNames, newTrailVals)
-    return valDict
 
 # ------------ PUBLIC API -------------
+def lines(array, cypher):
+    valDicts=[]
+    for ldata in array:
+        valDicts.append(toPlotData(ldata,cypher))
+
+    ndim = int('x' in cypher) + int('y' in cypher) + int('z' in cypher)
+    if ndim ==1:
+        lines1d(valDicts)
+    if ndim ==2:
+        lines2d(valDicts)  
+    if ndim ==3:
+        lines3d(valDicts)  
 
 def dots(data, cypher):
     valDict = toPlotData(data,cypher)
@@ -203,15 +271,7 @@ def dots(data, cypher):
         UniformDots3D_p(valDict)
 
 def line(data,cypher):
-    valDict = toPlotData(data,cypher)
-    ndim = int('x' in cypher) + int('y' in cypher) + int('z' in cypher)
-
-    if ndim <= 1:
-        plt.plot(valDict['x'])
-    if ndim == 2:
-        UniformLine2D(valDict['x'],valDict['y'])
-    if ndim == 3:
-        UniformLine3D_p(valDict)
+    lines([data],cypher)
     
     
 # ---------- TESTING -----------
@@ -225,18 +285,19 @@ pt=[]
 for u in range (0,5):
     for v in range (0,10):
         for w in range (0,10):
-            pt.append([u+math.sin(w),v+cos(u),w+v*0.1,u])
-dots(pt,'xyzs')
-            
+            pt.append([u+math.sin(w),v+math.cos(u),w+v*0.1,u])
+
+a=[[1,2,5],[3,4,5],[7,6,4]]
+lines(a,'*x')
 
 d=np.array([[1, 2, 3], [4, 5, 6]], np.int32)
-
-addNestedToData(d,'y:x:h',{})
+dots(d,'*x,*y')
 
 data = [[[1,2,3],[2,3,20],[5,5,11]],[0.1,0.2,0.8],8]
 #dots(data,'zxy,c,s')
 #line(data,'xyz,-,s')
-dots(pt,'xyzs')
+dots(pt,'xyz1')
+dots(pt,'xyz1')
 
 
 

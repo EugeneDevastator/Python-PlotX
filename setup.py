@@ -2,14 +2,13 @@ from setuptools import setup, find_packages
 import codecs
 import os
 
-here = os.path.abspath(os.path.dirname(__file__))
-
-with codecs.open(os.path.join(here, "README.md"), encoding="utf-8") as fh:
-    long_description = "\n" + fh.read()
-
-VERSION = '0.0.1'
+VERSION = '0.0.6'
 DESCRIPTION = 'Shortcuts for matplotlib'
-LONG_DESCRIPTION = 'i just want graphs not programming!'
+
+from os import path
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'plotx.md'), encoding='utf-8') as f:
+    long_description = f.read()
 
 # Setting up
 setup(
@@ -25,7 +24,7 @@ setup(
     keywords=['plot'],
     classifiers=[
         "Development Status :: 1 - Planning",
-        "Intended Audience :: Developers, Mathematicians, BI",
+        "Intended Audience :: Developers",
         "Programming Language :: Python :: 3",
         "Operating System :: Unix",
         "Operating System :: MacOS :: MacOS X",

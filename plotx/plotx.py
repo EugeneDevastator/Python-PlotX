@@ -206,8 +206,8 @@ def lines1d(valDicts):
         low = min(low,np.min(flatvals))
         high = max(high,np.max(flatvals))
 
-    ax.set_xlim(low, high)
-    ax.set_ylim(low, high)
+    axes.set_xlim(low, high)
+    axes.set_ylim(low, high)
         
     plt.show()
    
@@ -223,8 +223,8 @@ def lines2d(valDicts):
         low = min(low,np.min(flatvals))
         high = max(high,np.max(flatvals))
 
-    ax.set_xlim(low, high)
-    ax.set_ylim(low, high)
+    axes.set_xlim(low, high)
+    axes.set_ylim(low, high)
 
     plt.show()
 
@@ -238,8 +238,8 @@ def lines3d(valDicts):
         low = min(low,np.min(flatvals))
         high = max(high,np.max(flatvals))
 
-    ax.set_xlim(low, high)
-    ax.set_ylim(low, high)
+    axes.set_xlim(low, high)
+    axes.set_ylim(low, high)
 
     plt.show()
     
@@ -276,41 +276,42 @@ def line(data,cypher):
     
 # ---------- TESTING -----------
 
-import math
-pt = []
-for z in range (0,100):
-    pt.append([math.cos(z)*5,math.sin(z)*10,z])
-
-pt=[]
-for u in range (0,5):
-    for v in range (0,10):
-        for w in range (0,10):
-            pt.append([u+math.sin(w),v+math.cos(u),w+v*0.1,u])
-
-a=[[1,2,5],[3,4,5],[7,6,4]]
-lines(a,'*x')
-
-d=np.array([[1, 2, 3], [4, 5, 6]], np.int32)
-dots(d,'*x,*y')
-
-data = [[[1,2,3],[2,3,20],[5,5,11]],[0.1,0.2,0.8],8]
-#dots(data,'zxy,c,s')
-#line(data,'xyz,-,s')
-dots(pt,'xyz1')
-dots(pt,'xyz1')
-
-
-
-
-addNestedToData([[11,21,31],[41,51,61]],'x:y:h',{})    
-
-data=[
- [1,2,[-5,-6]],
- [11,12,[-15,-16]]
- ]
-
-addNestedToData(data,'p:xyk:s',{})
-
+def Test():
+    import math
+    pt = []
+    for z in range (0,100):
+        pt.append([math.cos(z)*5,math.sin(z)*10,z])
+    
+    pt=[]
+    for u in range (0,5):
+        for v in range (0,10):
+            for w in range (0,10):
+                pt.append([u+math.sin(w),v+math.cos(u),w+v*0.1,u])
+    
+    a=[[1,2,5],[3,4,5],[7,6,4]]
+    lines(a,'*x')
+    
+    d=np.array([[1, 2, 3], [4, 5, 6]], np.int32)
+    dots(d,'*x,*y')
+    
+    data = [[[1,2,3],[2,3,20],[5,5,11]],[0.1,0.2,0.8],8]
+    #dots(data,'zxy,c,s')
+    #line(data,'xyz,-,s')
+    dots(pt,'xyz1')
+    dots(pt,'xyz1')
+    
+    
+    
+    
+    addNestedToData([[11,21,31],[41,51,61]],'x:y:h',{})    
+    
+    data=[
+     [1,2,[-5,-6]],
+     [11,12,[-15,-16]]
+     ]
+    
+    addNestedToData(data,'p:xyk:s',{})
+    
 
 
 

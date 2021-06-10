@@ -5,8 +5,8 @@ Created on Tue Jun  8 13:01:39 2021
 @author: DaveAstator
 """
 
-import matplotlib.pyplot as plt;
-import numpy as np;
+import matplotlib.pyplot as plt
+import numpy as np
 
 # ------------------ data conversion -----------------
 # cupher format 
@@ -14,6 +14,7 @@ import numpy as np;
 # -:z indexing over array of z values, discaridng their indexes (as marke by -)
 # *z shorthand form of -:z
 # x,z outputs lists into corresponding names.
+
 def toPlotData(data, cypher):
     valDict = {}
     bins = cypher.split(',')
@@ -30,7 +31,7 @@ def toPlotData(data, cypher):
 #new list cypher snytax: i:xyi:z
 # for example [1,2,[3,4,5]] -:xy-:z
 
-def addNestedToData(nest,cypher,valDict = {},trailNames='',trailVals=[]):
+def addNestedToData(nest, cypher, valDict = {},trailNames='',trailVals=[]):
     cypher = cypher.replace('*','-:')
     
     for c in cypher.replace(':',''):
@@ -81,7 +82,28 @@ def addNestedToData(nest,cypher,valDict = {},trailNames='',trailVals=[]):
     return valDict
 
 # ---------- PLOTTING ---------------
-            
+# figure setup
+
+def create2dFigure():
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ax.set_aspect('equal')
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    return ax;
+
+def create3dFigure():
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ax.set_box_aspect((1, 1, 1)) 
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    return ax;
+
+# ----------------
 def UniformDots2D(x,y):
     low = np.min(np.concatenate((x,y)))
     high = np.max(np.concatenate((x,y)))
@@ -168,24 +190,6 @@ def UniformLine3D(x,y,z,c = None, s = None, a = 1):
     plt.show()
 
 
-def create2dFigure():
-    fig = plt.figure()
-    ax = fig.add_subplot()
-    ax.set_aspect('equal')
-
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    return ax;
-
-def create3dFigure():
-    fig = plt.figure()
-    ax = fig.add_subplot()
-    ax.set_box_aspect((1, 1, 1)) 
-
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    return ax;
 
 def plotLine3DLambda(ax, valDict):
     if 'a' not in valDict:
@@ -217,11 +221,10 @@ def lines2d(valDicts):
     low = valDicts[0]['x'][0]
     high = valDicts[0]['x'][0]
     for vd in valDicts:
-        flatvals = np.concatenate(vd['x'],vd['y'])
-        axes.plot(vd['x'],vd['y'])
-        
+        flatvals = np.concatenate((vd['x'],vd['y']))
         low = min(low,np.min(flatvals))
         high = max(high,np.max(flatvals))
+        axes.plot(vd['x'],vd['y'])
 
     axes.set_xlim(low, high)
     axes.set_ylim(low, high)
@@ -233,7 +236,7 @@ def lines3d(valDicts):
     low = valDicts[0]['x'][0]
     high = valDicts[0]['x'][0]
     for vd in valDicts:
-        flatvals = np.concatenate(vd['x'],vd['y'],vd['z'])
+        flatvals = np.concatenate((vd['x'],vd['y'],vd['z']))
         plotLine3DLambda(axes,vd)
         low = min(low,np.min(flatvals))
         high = max(high,np.max(flatvals))
@@ -259,6 +262,15 @@ def lines(array, cypher):
         lines3d(valDicts)  
 
 def dots(data, cypher):
+    """
+    Plots dots in 2d, or 3d space
+    can accept 1d, 2d, 3d data.
+    Semantics:
+        x, y, z -coordinate values
+        c - color values
+        s - dot size values
+        for example [[1, 2, 0.5], [2, 3, 0.3]] as '*xyc' will plot two dots with colors 0.5 an 0.3
+    """
     valDict = toPlotData(data,cypher)
     
     ndim = int('x' in cypher) + int('y' in cypher) + int('z' in cypher)
@@ -271,12 +283,57 @@ def dots(data, cypher):
         UniformDots3D_p(valDict)
 
 def line(data,cypher):
+    """
+    Plots continious line in 2d or 3d.
+    can have 1d 2d and 3d data.
+    Semantics:
+        x, y, z -coordinate values
+        c - color values
+        s - dot size values
+    """
     lines([data],cypher)
     
+def heatmap(z,m=[0,0],M=[1,1]):
+    """
+    Plots matrix data as heatmap \n
+    z - 2d matrix of values\n
+    m - minimum coordinate [x,y]\n 
+    M - MAXIMUM coordinate [x,y]\n
+    """
+    #semantics: m - minimum(x,y), M - MAXIMUM(x,y), z - grid of  values
+   
+    X = np.linspace(m[0],M[0],np.shape(z)[1]+1)
+    Y = np.linspace(m[1],M[1],np.shape(z)[0]+1)
+    z_min = np.min(z)
+    z_max = np.max(z)
     
+    ax = create2dFigure()
+    c = ax.pcolormesh(X,Y,z, cmap='RdBu', vmin=z_min, vmax=z_max)
+
 # ---------- TESTING -----------
 
 def Test():
+    
+    data=[[1,2],[3,4],[-3,-5]]
+    plotx.line(np.asarray(data),"*xy")
+    m=[0,0]
+    M=[400,400]
+    z=np.asarray([[1,6,11,12],
+       [2,21,22,7],
+       [5,4,3,2]])
+    np.concatenate((m,M))
+    
+    heatmap(z.T)
+    dots
+    shape(z)
+    X=np.linspace(m[0],M[0],shape(z)[1]+1)
+    Y=np.linspace(m[1],M[1],shape(z)[0]+1)
+    
+    ax= create2dFigure()
+    ax.pcolormesh(X, Y, z, alpha =0.5)
+    ax.pcolormesh(X+3, Y+5, z, alpha =0.5)
+
+
     import math
     pt = []
     for z in range (0,100):

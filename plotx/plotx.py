@@ -81,6 +81,47 @@ def addNestedToData(nest, cypher, valDict = {},trailNames='',trailVals=[]):
                 addNestedToData(nextNest, nestSemantic, valDict, newTrailNames, newTrailVals)
     return valDict
 
+# ---------- TODO ------------
+
+    
+def PrepareDotsData(plotData):
+    InitKey('c' , plotData);
+    InitKey('s' , plotData);
+    InitKey('x' , 0);
+    InitKey('y' , 0);
+    InitKey('a' , plotData);
+    
+    plotData['minX']=np.min(plotData['x'])
+    plotData['minY']=np.min(plotData['y'])
+    plotData['maxX']=np.max(plotData['x'])
+    plotData['maxY']=np.max(plotData['y'])
+
+    
+def PostFilter(plotData, filt):
+    for f in filt.split(','):
+        fmap = f.split('=')
+        dstName = fmap[0]
+        srcName = fmap[1]
+        plotData[dstName] = plotData[srcName]
+    
+def Write2dDots(ax, prepData):
+    print('3d point plot',s)
+   
+    ax.set_xlim(plotData['minX'], plotData['maxX'])
+    ax.set_ylim(plotData['minY'], plotData['maxY'])
+    ax.set_box_aspect((1, 1, 1)) 
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    
+    ax.scatter(plotData['x'],plotData['y'], c=plotData['c'], s=plotData['s'], alpha = plotData['a'])
+
+def Dots2DPlot(plotData):
+    PrepareDotsData(plotData);
+    ax = create2dFigure();
+    Write2dDots(ax, prepData);
+    plt.show();
+    
+
 # ---------- PLOTTING ---------------
 # figure setup
 
@@ -110,6 +151,7 @@ def UniformDots2D(x,y):
     plt.xlim(low, high)
     plt.ylim(low, high)
     plt.scatter(x,y)
+
     
 def UniformLine2D(x,y):
     low = np.min(np.concatenate((x,y)))
@@ -123,6 +165,10 @@ def ValOrNone(key,dic):
         return dic[key]
     else:
         return None
+    
+def InitKey(key, dick, default=None):
+    if key not in dick:
+        dick[key] = default
     
 def UniformDots3D_p(plotData):
     c = ValOrNone('c' , plotData);
@@ -214,7 +260,7 @@ def lines1d(valDicts):
     axes.set_ylim(low, high)
         
     plt.show()
-   
+
 def lines2d(valDicts):
     actions=[]
     axes = create2dFigure()   

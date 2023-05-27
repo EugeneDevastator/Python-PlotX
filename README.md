@@ -14,5 +14,6 @@ plotx.dots(data,"*x,*y")
 ```
 
 *xy will unfold like x=1,y=10 ; x=2,y=20
+
 *x,*y will unfold like x=1,y=2 ; x=10,y=20
 

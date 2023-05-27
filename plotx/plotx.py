@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # ------------------ data conversion -----------------
-# cupher format 
+# cypher format 
 # p:xy indexing over list of points [x,y], outputting indexes into p and [x,y] values into x and y lists
-# -:z indexing over array of z values, discaridng their indexes (as marke by -)
+# -:z indexing over array of z values, discaridng their indexes (as marked by -)
 # *z shorthand form of -:z
 # x,z outputs lists into corresponding names.
 
